@@ -11,9 +11,7 @@ part 'map_state.dart';
 class MapBloc extends Bloc<MapEvent, MapState> {
   GoogleMapController? _mapController;
   MapBloc() : super(const MapState()) {
-    on<MapEvent>((event, emit) {
-      on<OnMapInitializedEvent>(_onInitMap);
-    });
+    on<OnMapInitializedEvent>(_onInitMap);
   }
 
   void _onInitMap(OnMapInitializedEvent event, Emitter<MapState> emit) {
