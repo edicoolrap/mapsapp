@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mapas/blocs/blocs.dart';
 import 'package:mapas/views/views.dart';
 import 'package:mapas/widgets/widgets.dart';
@@ -31,23 +32,33 @@ class _MapScreenState extends State<MapScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: BlocBuilder<LocationBloc, LocationState>(
-        builder: (context, state) {
-          if (state.lastKnowLocation == null) {
+        builder: (context, locationState) {
+          if (locationState.lastKnowLocation == null) {
             return const Center(child: Text('Espere por favor...'));
           }
-          return SingleChildScrollView(
-            child: Stack(
-              children: [
-                MapView(initialLocation: state.lastKnowLocation!),
-              ],
-            ),
+          return BlocBuilder<MapBloc, MapState>(
+            builder: (context, mapState) {
+              Map<String, Polyline> polylines = Map.from(mapState.polylines);
+              if (!mapState.showMyRoute) {
+                polylines.removeWhere((key, value) => key == 'myRoute');
+              }
+              return SingleChildScrollView(
+                child: Stack(
+                  children: [
+                    MapView(
+                        polylines: polylines.values.toSet(),
+                        initialLocation: locationState.lastKnowLocation!),
+                  ],
+                ),
+              );
+            },
           );
         },
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: const Column(
         mainAxisAlignment: MainAxisAlignment.end,
-        children: [BtnCurrentLocation()],
+        children: [BtnShowPolylines(), BtnFollowUser(), BtnCurrentLocation()],
       ),
     );
   }
